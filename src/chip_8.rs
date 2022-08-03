@@ -23,7 +23,11 @@ impl Ram {
             let current_val = match vals_iter.next() {
                 Some(x) => x,
                 None => {
-                    println!("set_range ran out of ram. range specified = [{} - {}], len = {}. Length of vals to store = {}", pos.0, pos.1, pos.1-pos.0, vals.len());
+                    println!("set_range ran out of ram to write to. range specified = [{} - {}], len = {}. Length of vals to store = {}", 
+                        pos.0, 
+                        pos.1, 
+                        pos.1-pos.0, 
+                        vals.len());
                     return;
                 }
             };
@@ -86,11 +90,10 @@ impl cpu {
     fn init_ram() -> Ram {
         // put fonts where they belong
         let ram: Ram = Ram([0x00; RAM_SIZE]);
-        let mut ram = match cpu::load_font(ram) {
+        let ram = match cpu::load_font(ram) {
             Ok(x) => x,
             Err(err) => panic!("{err}"),
         };
-        ram.set_range((0, 9), vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
         println!("{ram}");
         ram
     }
@@ -132,4 +135,23 @@ impl cpu {
         }
         Ok(ram)
     }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{Ram, RAM_SIZE};
+
+    #[test]
+    fn set_first_ram_pos() {
+        let mut ram = Ram([0x00; RAM_SIZE]);
+        ram.set(0, 5);
+        assert_eq!(ram.0[0], 5);
+
+
+        for (idx,word) in ram.0.iter().enumerate() {
+            if idx == 0 { continue; }
+            assert_eq!(*word, 0);
+        }
+    }
+
 }

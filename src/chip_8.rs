@@ -14,6 +14,22 @@ impl Ram {
     pub fn set(&mut self, pos: usize, val: u8) {
         self.0[pos] = val;
     }
+    pub fn set_range(&mut self, pos: (usize, usize), vals: Vec<u8>) {
+        if (pos.1 - pos.0) + 1 != vals.len() {
+            return;
+        }
+        let mut vals_iter = vals.iter();
+        for ram_idx in pos.0..=pos.1 {
+            let current_val = match vals_iter.next() {
+                Some(x) => x,
+                None => {
+                    println!("set_range ran out of ram. range specified = [{} - {}], len = {}. Length of vals to store = {}", pos.0, pos.1, pos.1-pos.0, vals.len());
+                    return;
+                }
+            };
+            self.set(ram_idx, *current_val)
+        }
+    }
 }
 
 impl fmt::Display for Ram {
@@ -70,10 +86,11 @@ impl cpu {
     fn init_ram() -> Ram {
         // put fonts where they belong
         let ram: Ram = Ram([0x00; RAM_SIZE]);
-        let ram = match cpu::load_font(ram) {
+        let mut ram = match cpu::load_font(ram) {
             Ok(x) => x,
             Err(err) => panic!("{err}"),
         };
+        ram.set_range((0, 9), vec![0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
         println!("{ram}");
         ram
     }

@@ -1,70 +1,12 @@
-use core::fmt;
+use super::memory::Ram;
+
 use regex::Regex;
-use std::{cmp, fs};
-
-pub const RAM_SIZE: usize = 4096;
-
-// type RamType = [u8; 4096];
-#[derive(Copy, Clone)]
-struct Ram([u8; RAM_SIZE]);
-impl Ram {
-    pub fn get(&self, pos: usize) -> u8 {
-        self.0[pos]
-    }
-    pub fn set(&mut self, pos: usize, val: u8) {
-        self.0[pos] = val;
-    }
-    pub fn set_range(&mut self, pos: (usize, usize), vals: Vec<u8>) {
-        if (pos.1 - pos.0) + 1 != vals.len() {
-            return;
-        }
-        let mut vals_iter = vals.iter();
-        for ram_idx in pos.0..=pos.1 {
-            let current_val = match vals_iter.next() {
-                Some(x) => x,
-                None => {
-                    println!("set_range ran out of ram to write to. range specified = [{} - {}], len = {}. Length of vals to store = {}", 
-                        pos.0, 
-                        pos.1, 
-                        pos.1-pos.0, 
-                        vals.len());
-                    return;
-                }
-            };
-            self.set(ram_idx, *current_val)
-        }
-    }
-}
-
-impl fmt::Display for Ram {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        const GROUPING: usize = 8;
-        let mut pos: usize = 0;
-        let mut current_iter = 0;
-        writeln!(f, "Ram:")?;
-        while pos < RAM_SIZE {
-            // covers start case + every GROUPINGth
-            if current_iter == 0 || current_iter == GROUPING {
-                write!(
-                    f,
-                    "\n[{:#05X} - {:#05X}]: ",
-                    pos,
-                    cmp::min(pos + GROUPING - 1, RAM_SIZE - 1)
-                )?;
-                current_iter = 0;
-            }
-            write!(f, "{:#04X} ", self.get(pos))?;
-            pos += 1;
-            current_iter += 1
-        }
-        Ok(())
-    }
-}
+use std::fs;
 
 mod addressing_consts {
     pub const PROGRAM_START: u16 = 0x0200;
     pub const FONT_POS: (u16, u16) = (0x050, 0x09F);
-    pub const FONT_SIZE: u8 = 0x05;
+    //pub const FONT_SIZE: u8 = 0x05;
 }
 
 pub fn init() -> cpu {
@@ -74,6 +16,7 @@ pub fn init() -> cpu {
 #[allow(non_camel_case_types)]
 pub struct cpu {
     ram: Ram,
+    stack: Vec<u16>,
     pc: u16,  // really 12 bits wide
     idx: u16, // really 12 bits wide
 }
@@ -82,6 +25,7 @@ impl cpu {
     pub fn new() -> cpu {
         cpu {
             ram: cpu::init_ram(),
+            stack: vec![],
             pc: 0x0000,
             idx: 0x0000,
         }
@@ -89,7 +33,7 @@ impl cpu {
 
     fn init_ram() -> Ram {
         // put fonts where they belong
-        let ram: Ram = Ram([0x00; RAM_SIZE]);
+        let ram: Ram = Ram::new();
         let ram = match cpu::load_font(ram) {
             Ok(x) => x,
             Err(err) => panic!("{err}"),
@@ -102,12 +46,14 @@ impl cpu {
         let mut ram = ram;
         let font = fs::read_to_string("./resources/font.txt").expect("font could not be loaded");
         let mut ram_pos = addressing_consts::FONT_POS.0;
-        let mut letters: Vec<&str> = Regex::new(r"[,]*[  ]* // [0-9a-zA-Z][\n]*")
-            .unwrap()
-            .split(&font)
-            .collect();
-
-        letters.pop();
+        let letters: Vec<&str> = {
+            let mut letters: Vec<&str> = Regex::new(r"[,]*[  ]* // [0-9a-zA-Z][\n]*")
+                .unwrap()
+                .split(&font)
+                .collect();
+            letters.pop();
+            letters
+        };
 
         for letter in &letters {
             let bytes: Vec<&str> = letter.trim().split(", ").collect();
@@ -135,23 +81,4 @@ impl cpu {
         }
         Ok(ram)
     }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::{Ram, RAM_SIZE};
-
-    #[test]
-    fn set_first_ram_pos() {
-        let mut ram = Ram([0x00; RAM_SIZE]);
-        ram.set(0, 5);
-        assert_eq!(ram.0[0], 5);
-
-
-        for (idx,word) in ram.0.iter().enumerate() {
-            if idx == 0 { continue; }
-            assert_eq!(*word, 0);
-        }
-    }
-
 }

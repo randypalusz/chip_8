@@ -42,8 +42,7 @@ impl cpu {
         ram
     }
 
-    fn load_font(ram: Ram) -> Result<Ram, String> {
-        let mut ram = ram;
+    fn load_font(mut ram: Ram) -> Result<Ram, String> {
         let font = fs::read_to_string("./resources/font.txt").expect("font could not be loaded");
         let mut ram_pos = addressing_consts::FONT_POS.0;
         let letters: Vec<&str> = {

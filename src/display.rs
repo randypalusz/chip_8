@@ -1,7 +1,7 @@
 use glutin_window::GlutinWindow as Window;
 use graphics::types::Color;
 use opengl_graphics::{GlGraphics, OpenGL};
-use piston::input::RenderArgs;
+use piston::input::{RenderArgs, UpdateArgs};
 use piston::window::WindowSettings;
 
 const NUM_PIXELS_Y: usize = 32;

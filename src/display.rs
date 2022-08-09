@@ -10,11 +10,27 @@ const NUM_PIXELS: usize = NUM_PIXELS_X * NUM_PIXELS_Y;
 
 type PixelsArray = [Pixel; NUM_PIXELS];
 
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub enum PixelState {
+    On,
+    Off,
+}
+
+impl std::ops::Not for PixelState {
+    type Output = PixelState;
+    fn not(self) -> PixelState {
+        match self {
+            Self::On => Self::Off,
+            Self::Off => Self::On,
+        }
+    }
+}
+
 #[derive(Clone, Copy, Debug)]
 pub struct Pixel {
     start_x: f64,
     start_y: f64,
-    state: bool, // false is off, true is on
+    state: PixelState, // false is off, true is on
 }
 
 pub struct Display {
@@ -62,8 +78,8 @@ impl Display {
 
     //TODO: remove this, just being used to test display for now
     fn pixel_test(pixels: &mut PixelsArray) {
-        let mut first_state_toggle: bool = false;
-        let mut state_toggle: bool = first_state_toggle;
+        let mut first_state_toggle: PixelState = PixelState::Off;
+        let mut state_toggle: PixelState = first_state_toggle;
 
         for (idx, mut pixel) in pixels.iter_mut().enumerate() {
             state_toggle = !state_toggle;
@@ -79,7 +95,7 @@ impl Display {
         let mut pixels: PixelsArray = [Pixel {
             start_x: 0.0,
             start_y: 0.0,
-            state: false,
+            state: PixelState::Off,
         }; NUM_PIXELS];
 
         let mut current_x: f64 = 0.0;
@@ -96,8 +112,18 @@ impl Display {
 
             current_x += pixel_size;
         }
-        // println!("{:?}", pixels);
         pixels
+    }
+
+    pub fn set_pixel(&mut self, pixel: usize, value: PixelState) {
+        self.pixels[pixel].state = value;
+    }
+
+    // TODO: Test that this works
+    pub fn set_pixels(&mut self, pixels: Vec<usize>, values: Vec<PixelState>) {
+        for (pixel, value) in pixels.iter().zip(values.iter()) {
+            self.pixels[*pixel].state = *value;
+        }
     }
 
     pub fn render(&mut self, args: &RenderArgs) {
@@ -109,7 +135,7 @@ impl Display {
 
             for pixel in self.pixels {
                 let transform = c.transform.trans(pixel.start_x, pixel.start_y);
-                let draw_color = if pixel.state {
+                let draw_color = if pixel.state == PixelState::On {
                     self.on_color
                 } else {
                     self.off_color

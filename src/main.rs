@@ -14,10 +14,8 @@ fn main() {
     chip_8::init();
     let mut display = display::Display::new();
     let mut events = Events::new(EventSettings::new());
-    //println!("{:?}", display.pixels);
     while let Some(e) = events.next(&mut display.window) {
         if let Some(args) = e.render_args() {
-            // render(&rotation, &args, &mut renderer)
             display.render(&args);
         }
 

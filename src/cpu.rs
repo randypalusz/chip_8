@@ -9,22 +9,18 @@ mod addressing_consts {
     //pub const FONT_SIZE: u8 = 0x05;
 }
 
-pub fn init() -> cpu {
-    cpu::new()
-}
-
 #[allow(non_camel_case_types)]
-pub struct cpu {
+pub struct CPU {
     ram: Ram,
     stack: Vec<u16>,
     pc: u16,  // really 12 bits wide
     idx: u16, // really 12 bits wide
 }
 
-impl cpu {
-    pub fn new() -> cpu {
-        cpu {
-            ram: cpu::init_ram(),
+impl CPU {
+    pub fn new() -> CPU {
+        CPU {
+            ram: CPU::init_ram(),
             stack: vec![],
             pc: 0x0000,
             idx: 0x0000,
@@ -34,7 +30,7 @@ impl cpu {
     fn init_ram() -> Ram {
         // put fonts where they belong
         let ram: Ram = Ram::new();
-        let ram = match cpu::load_font(ram) {
+        let ram = match CPU::load_font(ram) {
             Ok(x) => x,
             Err(err) => panic!("{err}"),
         };

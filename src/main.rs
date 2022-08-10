@@ -1,6 +1,9 @@
-mod chip_8;
+mod cpu;
 mod display;
 mod memory;
+
+use cpu::CPU;
+use display::Display;
 
 extern crate glutin_window;
 extern crate graphics;
@@ -12,8 +15,9 @@ use piston::input::{RenderArgs, RenderEvent, UpdateArgs, UpdateEvent};
 use piston::ButtonEvent;
 
 fn main() {
-    let _chip_8_instance = chip_8::init();
-    let mut display = display::Display::new();
+    // TODO: wrap this stuff in a CHIP_8 module
+    let _cpu = CPU::new();
+    let mut display = Display::new();
     let mut events = Events::new(EventSettings::new());
     while let Some(e) = events.next(&mut display.window) {
         if let Some(args) = e.render_args() {

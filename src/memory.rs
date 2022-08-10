@@ -16,6 +16,7 @@ impl Ram {
     pub fn set(&mut self, pos: usize, val: u8) {
         self.0[pos] = val;
     }
+    #[allow(dead_code)]
     pub fn set_range(&mut self, pos: (usize, usize), vals: Vec<u8>) {
         if (pos.1 - pos.0) + 1 != vals.len() {
             return;

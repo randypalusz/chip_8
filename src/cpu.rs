@@ -3,13 +3,14 @@ use super::memory::Ram;
 use regex::Regex;
 use std::fs;
 
+#[allow(dead_code)]
 mod addressing_consts {
     pub const PROGRAM_START: u16 = 0x0200;
     pub const FONT_POS: (u16, u16) = (0x050, 0x09F);
     //pub const FONT_SIZE: u8 = 0x05;
 }
 
-#[allow(non_camel_case_types)]
+#[allow(non_camel_case_types, dead_code)]
 pub struct CPU {
     ram: Ram,
     stack: Vec<u16>,

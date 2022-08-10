@@ -11,7 +11,7 @@ extern crate opengl_graphics;
 extern crate piston;
 
 use piston::event_loop::{EventSettings, Events};
-use piston::input::{RenderArgs, RenderEvent, UpdateArgs, UpdateEvent};
+use piston::input::{RenderEvent, UpdateEvent};
 use piston::ButtonEvent;
 
 fn main() {
@@ -26,13 +26,13 @@ fn main() {
         }
 
         if let Some(args) = e.button_args() {
-            let button_state = args.state;
-            let button = args.button;
+            let _button_state = args.state;
+            let _button = args.button;
             // TODO: call device.set_key(button, button_state) to set ram based on the key input
             // println!("{:?}: {:?}", button_state, button);
         }
 
-        if let Some(args) = e.update_args() {
+        if let Some(_args) = e.update_args() {
             // TODO: call device.update(args.dt) or something to update timers based on the program's run speed
         }
     }

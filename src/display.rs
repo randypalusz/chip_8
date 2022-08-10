@@ -1,7 +1,7 @@
 use glutin_window::GlutinWindow as Window;
 use graphics::types::Color;
 use opengl_graphics::{GlGraphics, OpenGL};
-use piston::input::{RenderArgs, UpdateArgs};
+use piston::input::RenderArgs;
 use piston::window::WindowSettings;
 
 const NUM_PIXELS_Y: usize = 32;
@@ -34,8 +34,8 @@ pub struct Pixel {
 }
 
 pub struct Display {
-    width: f64,  // window width
-    height: f64, // window height
+    _width: f64,  // window width
+    _height: f64, // window height
     pixel_size: f64,
     pub pixels: [Pixel; NUM_PIXELS], //indexing for pixels (false = off, true = on)
     off_color: Color,                //Color consts
@@ -65,8 +65,8 @@ impl Display {
         Display::pixel_test(&mut pixels);
 
         Display {
-            width,
-            height,
+            _width: width,
+            _height: height,
             pixel_size,
             pixels,
             off_color: [0.0, 0.0, 0.0, 1.0],
@@ -115,11 +115,13 @@ impl Display {
         pixels
     }
 
+    #[allow(dead_code)]
     pub fn set_pixel(&mut self, pixel: usize, value: PixelState) {
         self.pixels[pixel].state = value;
     }
 
     // TODO: Test that this works
+    #[allow(dead_code)]
     pub fn set_pixels(&mut self, pixels: Vec<usize>, values: Vec<PixelState>) {
         for (pixel, value) in pixels.iter().zip(values.iter()) {
             self.pixels[*pixel].state = *value;

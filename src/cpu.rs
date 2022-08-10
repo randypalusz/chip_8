@@ -35,7 +35,7 @@ impl CPU {
             Ok(x) => x,
             Err(err) => panic!("{err}"),
         };
-        println!("{ram}");
+        //println!("{ram}");
         ram
     }
 

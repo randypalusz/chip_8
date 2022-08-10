@@ -1,8 +1,5 @@
-use glutin_window::GlutinWindow as Window;
-use graphics::types::Color;
-use opengl_graphics::{GlGraphics, OpenGL};
-use piston::input::RenderArgs;
-use piston::window::WindowSettings;
+use ggez::graphics::{self, Color};
+use mint::Point2;
 
 const NUM_PIXELS_Y: usize = 32;
 const NUM_PIXELS_X: usize = 64;
@@ -28,37 +25,28 @@ impl std::ops::Not for PixelState {
 
 #[derive(Clone, Copy, Debug)]
 pub struct Pixel {
-    start_x: f64,
-    start_y: f64,
+    start_x: f32,
+    start_y: f32,
     state: PixelState, // false is off, true is on
 }
 
 pub struct Display {
-    _width: f64,  // window width
-    _height: f64, // window height
-    pixel_size: f64,
+    _width: f32,  // window width
+    _height: f32, // window height
+    _pixel_size: f32,
+    pixel_template: graphics::Rect,
     pub pixels: [Pixel; NUM_PIXELS], //indexing for pixels (false = off, true = on)
-    off_color: Color,                //Color consts
-    on_color: Color,                 //Color consts
-    pub window: Window,
-    renderer: GlGraphics,
+    off_color: graphics::Color,      //Color consts
+    on_color: graphics::Color,       //Color consts
 }
 
 impl Display {
-    pub fn new() -> Display {
-        let height = 500.0;
+    pub fn new(window_height: f32) -> Display {
+        let height = window_height;
         let width = height * 2.0;
-        let pixel_size: f64 = height / (NUM_PIXELS_Y as f64);
+        let pixel_size: f32 = height / (NUM_PIXELS_Y as f32);
 
-        let opengl = OpenGL::V3_2;
-
-        let window: Window = WindowSettings::new("CHIP-8", [width, height])
-            .graphics_api(opengl)
-            .exit_on_esc(true)
-            .resizable(false)
-            .build()
-            .unwrap();
-        let renderer: GlGraphics = opengl_graphics::GlGraphics::new(opengl);
+        let pixel_template = graphics::Rect::new(0.0, 0.0, pixel_size, pixel_size);
 
         let mut pixels: PixelsArray = Display::init_pixels(&pixel_size, &width, &height);
 
@@ -67,12 +55,11 @@ impl Display {
         Display {
             _width: width,
             _height: height,
-            pixel_size,
+            _pixel_size: pixel_size,
+            pixel_template,
             pixels,
-            off_color: [0.0, 0.0, 0.0, 1.0],
-            on_color: [1.0, 1.0, 1.0, 1.0],
-            window,
-            renderer,
+            off_color: Color::BLACK,
+            on_color: Color::WHITE,
         }
     }
 
@@ -91,20 +78,20 @@ impl Display {
         }
     }
 
-    fn init_pixels(pixel_size: &f64, window_width: &f64, window_height: &f64) -> PixelsArray {
+    fn init_pixels(pixel_size: &f32, window_width: &f32, window_height: &f32) -> PixelsArray {
         let mut pixels: PixelsArray = [Pixel {
             start_x: 0.0,
             start_y: 0.0,
             state: PixelState::Off,
         }; NUM_PIXELS];
 
-        let mut current_x: f64 = 0.0;
-        let mut current_y: f64 = 0.0;
+        let mut current_x: f32 = 0.0;
+        let mut current_y: f32 = 0.0;
 
         for mut pixel in pixels.iter_mut() {
             if current_x >= *window_width {
                 current_x = 0.0;
-                current_y += window_height / NUM_PIXELS_Y as f64;
+                current_y += window_height / NUM_PIXELS_Y as f32;
             }
 
             pixel.start_x = current_x;
@@ -128,22 +115,27 @@ impl Display {
         }
     }
 
-    pub fn render(&mut self, args: &RenderArgs) {
-        use graphics::*;
+    pub fn render(&mut self, ctx: &mut ggez::Context) -> ggez::GameResult<()> {
+        let mut canvas = graphics::Canvas::from_frame(ctx, Color::BLACK);
+        for pixel in self.pixels {
+            let draw_color = if pixel.state == PixelState::On {
+                self.on_color
+            } else {
+                self.off_color
+            };
+            let transform: Point2<f32> = Point2 {
+                x: pixel.start_x,
+                y: pixel.start_y,
+            };
 
-        let square = rectangle::square(0.0, 0.0, self.pixel_size);
-        self.renderer.draw(args.viewport(), |c, gl| {
-            clear(self.off_color, gl);
-
-            for pixel in self.pixels {
-                let transform = c.transform.trans(pixel.start_x, pixel.start_y);
-                let draw_color = if pixel.state == PixelState::On {
-                    self.on_color
-                } else {
-                    self.off_color
-                };
-                rectangle(draw_color, square, transform, gl);
-            }
-        });
+            canvas.draw(
+                &graphics::Quad,
+                graphics::DrawParam::new()
+                    .dest(transform)
+                    .color(draw_color)
+                    .scale(self.pixel_template.size()),
+            );
+        }
+        canvas.finish(ctx)
     }
 }

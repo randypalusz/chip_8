@@ -1,4 +1,4 @@
-use ggez::graphics::{self, Color};
+use ggez::graphics::{self, Canvas, Color};
 use mint::Point2;
 
 const NUM_PIXELS_Y: usize = 32;
@@ -115,8 +115,7 @@ impl Display {
         }
     }
 
-    pub fn render(&mut self, ctx: &mut ggez::Context) -> ggez::GameResult<()> {
-        let mut canvas = graphics::Canvas::from_frame(ctx, Color::BLACK);
+    pub fn render(&mut self, ctx: &mut ggez::Context, canvas: &mut Canvas) -> ggez::GameResult<()> {
         for pixel in self.pixels {
             let draw_color = if pixel.state == PixelState::On {
                 self.on_color
@@ -136,6 +135,6 @@ impl Display {
                     .scale(self.pixel_template.size()),
             );
         }
-        canvas.finish(ctx)
+        Ok(())
     }
 }

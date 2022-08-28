@@ -5,11 +5,16 @@ mod memory;
 
 use ggez::{conf, Context, ContextBuilder};
 
-const WINDOW_HEIGHT: f32 = 500.0;
+const DEFAULT_WINDOW_HEIGHT: f32 = 500.0;
 
-// TODO: replace piston with ggez
 fn main() {
-    let instance = chip_8::CHIP_8::new(WINDOW_HEIGHT);
+    // only parsing the window height for now
+    let win_height: f32 = match std::env::args().nth(1) {
+        None => DEFAULT_WINDOW_HEIGHT,
+        Some(num) => num.parse::<f32>().unwrap(),
+    };
+
+    let instance = chip_8::CHIP_8::new(win_height);
 
     let c = conf::Conf::new();
     let (ctx, event_loop): (Context, ggez::winit::event_loop::EventLoop<()>) =
@@ -18,7 +23,7 @@ fn main() {
             .window_mode(
                 conf::WindowMode::default()
                     .resizable(false)
-                    .dimensions(WINDOW_HEIGHT * 2.0, WINDOW_HEIGHT),
+                    .dimensions(win_height * 3.0, win_height),
             )
             .window_setup(conf::WindowSetup::default().title("CHIP_8").vsync(true))
             .build()

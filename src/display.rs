@@ -115,7 +115,11 @@ impl Display {
         }
     }
 
-    pub fn render(&mut self, ctx: &mut ggez::Context, canvas: &mut Canvas) -> ggez::GameResult<()> {
+    pub fn render(
+        &mut self,
+        _ctx: &mut ggez::Context,
+        canvas: &mut Canvas,
+    ) -> ggez::GameResult<()> {
         for pixel in self.pixels {
             let draw_color = if pixel.state == PixelState::On {
                 self.on_color

@@ -10,6 +10,15 @@ mod addressing_consts {
     //pub const FONT_SIZE: u8 = 0x05;
 }
 
+//TODO: implement these instructions, maybe a function to transform
+//      what is seen in memory to one of these instructions
+#[allow(dead_code)]
+enum Instruction {
+    CLS,
+    RET,
+    JP(u16),
+}
+
 #[allow(non_camel_case_types, dead_code)]
 pub struct CPU {
     ram: Ram,
@@ -26,6 +35,12 @@ impl CPU {
             pc: 0x0000,
             idx: 0x0000,
         }
+    }
+
+    // TODO - implement this
+    pub fn execute(&mut self) {
+        // use PC value to look at that position in ram
+        // grab value at that address and run an instruction/update things accordingly
     }
 
     fn init_ram() -> Ram {

@@ -10,4 +10,9 @@
 ## Build
 * Install rustup, cargo as the package manager, then simply execute:
 
-      cargo run 
+      cargo build
+
+## Running
+* Run in release mode via the following:
+
+      cargo run <optional_window_width_in_pixels> --release

@@ -29,24 +29,33 @@ impl CHIP_8 {
 impl ggez::event::EventHandler<GameError> for CHIP_8 {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
         let egui_ctx = self.egui_backend.ctx();
+        egui::Window::new("egui window").show(&egui_ctx, |ui| {
+            ui.set_min_size((500.0, 500.0).into());
+            egui_ctx.set_pixels_per_point(10.0);
+            ui.label("label");
+            if ui.button("print frametime").clicked() {
+                println!("frametime:");
+            }
+            if ui.button("quit").clicked() {
+                ggez::event::request_quit(ctx);
+            }
+        });
+        self.egui_backend.update(ctx);
+
         while ctx.time.check_update_time(DESIRED_FPS) {
-            let seconds = 1.0 / (DESIRED_FPS as f32);
-            egui::Window::new("egui window").show(&egui_ctx, |ui| {
-                ui.label("label");
-                if ui.button("print frametime").clicked() {
-                    println!("frametime: {}", seconds);
-                }
-                if ui.button("quit").clicked() {
-                    ggez::event::request_quit(ctx);
-                }
-            });
+            let _seconds = 1.0 / (DESIRED_FPS as f32);
+            // println!("frametime: {}", seconds);
+
+            // execute next cpu cycle here
+            self.cpu.execute();
         }
         Ok(())
     }
 
     fn draw(&mut self, ctx: &mut Context) -> GameResult<()> {
         //TODO: call self.display.set_pixels(<cpu.ram_slice where display data is contained>)
-        let mut canvas = ggez::graphics::Canvas::from_frame(ctx, ggez::graphics::Color::BLACK);
+        let mut canvas =
+            ggez::graphics::Canvas::from_frame(ctx, ggez::graphics::Color::new(0.2, 0.2, 0.2, 1.0));
         let mut result = self.display.render(ctx, &mut canvas);
 
         // TODO: uncomment when ggez_egui is updated to support ggez 8.0.0

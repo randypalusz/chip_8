@@ -5,7 +5,7 @@ use ggez::input::keyboard::{KeyCode, KeyInput};
 use ggez::Context;
 use ggez::GameError;
 use ggez::GameResult;
-use ggez_egui::EguiBackend;
+// use ggez_egui::EguiBackend;
 
 const DESIRED_FPS: u32 = 60;
 
@@ -13,7 +13,8 @@ const DESIRED_FPS: u32 = 60;
 pub struct CHIP_8 {
     cpu: CPU,
     display: Display,
-    egui_backend: EguiBackend,
+    // TODO: uncomment when ggez_egui is updated
+    // egui_backend: EguiBackend,
 }
 
 impl CHIP_8 {
@@ -21,30 +22,32 @@ impl CHIP_8 {
         CHIP_8 {
             cpu: CPU::new(),
             display: Display::new(window_height),
-            egui_backend: EguiBackend::default(),
+            // TODO: uncomment when ggez_egui is updated
+            // egui_backend: EguiBackend::default(),
         }
     }
 }
 
 impl ggez::event::EventHandler<GameError> for CHIP_8 {
     fn update(&mut self, ctx: &mut Context) -> GameResult<()> {
-        let egui_ctx = self.egui_backend.ctx();
-        egui::Window::new("egui window").show(&egui_ctx, |ui| {
-            ui.set_min_size((500.0, 500.0).into());
-            egui_ctx.set_pixels_per_point(10.0);
-            ui.label("label");
-            if ui.button("print frametime").clicked() {
-                println!("frametime:");
-            }
-            if ui.button("quit").clicked() {
-                ggez::event::request_quit(ctx);
-            }
-        });
-        self.egui_backend.update(ctx);
+        // TODO: uncomment when ggez_egui is updated
+        // let egui_ctx = self.egui_backend.ctx();
+        // egui::Window::new("egui window").show(&egui_ctx, |ui| {
+        //     ui.set_min_size((500.0, 500.0).into());
+        //     egui_ctx.set_pixels_per_point(10.0);
+        //     ui.label("label");
+        //     if ui.button("print frametime").clicked() {
+        //         println!("frametime:");
+        //     }
+        //     if ui.button("quit").clicked() {
+        //         ggez::event::request_quit(ctx);
+        //     }
+        // });
+        // self.egui_backend.update(ctx);
 
         while ctx.time.check_update_time(DESIRED_FPS) {
             let _seconds = 1.0 / (DESIRED_FPS as f32);
-            // println!("frametime: {}", seconds);
+            // println!("frametime: {}", _seconds);
 
             // execute next cpu cycle here
             self.cpu.execute();
